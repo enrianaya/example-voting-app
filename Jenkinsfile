@@ -178,7 +178,7 @@ pipeline {
         always {
             echo 'Pipelinee for instavote app is completed..'
         }
-        failiure {
+        failure {
             slackSend(channel: "instavote-cd", message: "Build Failed - ${env.JOB_NAME} ${env.BUILD_NUMBER} (<${env.BUILD_URL}|Open>)")
         }
         success {
