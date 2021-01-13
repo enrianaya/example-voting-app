@@ -1,7 +1,7 @@
 pipeline {
 
     agent none
-	
+
     stages {
         stage('worker build') {
             agent {
@@ -10,12 +10,12 @@ pipeline {
                 args '-v $HOME/.m2:/root/.m2'
               }
             }
-			when{
-			  changeset "**/worker/**"
-			}
-			steps {
-                echo 'building worker app' 
-				dir('worker') {
+                        when{
+                          changeset "**/worker/**"
+                        }
+                        steps {
+                echo 'building worker app'
+                                dir('worker') {
                     sh 'mvn compile'
                 }
             }
@@ -27,12 +27,12 @@ pipeline {
                 args '-v $HOME/.m2:/root/.m2'
               }
             }
-			when{
-			  changeset "**/worker/**"
-			}            
-			steps {
-                echo 'running unit tests on worker app' 
-				dir('worker') {
+            when{
+              changeset "**/worker/**"
+            }
+            steps {
+              echo 'running unit tests on worker app'
+                dir('worker') {
                     sh 'mvn clean test'
                 }
             }
@@ -44,26 +44,26 @@ pipeline {
                 args '-v $HOME/.m2:/root/.m2'
               }
             }
-			when{
-			  branch 'master'
-			  changeset "**/worker/**"
-			}
+                        when{
+                          branch 'master'
+                          changeset "**/worker/**"
+                        }
             steps {
-                echo 'packaging worker app into a jarfile' 
-		        dir('worker') {
+                echo 'packaging worker app into a jarfile'
+                        dir('worker') {
                   sh 'mvn package -DskipTests'
-	              archiveArtifacts artifacts: '**/target/*.jar', fingerprint: true
+                      archiveArtifacts artifacts: '**/target/*.jar', fingerprint: true
                 }
             }
         }
         stage('worker-docker-package') {
             agent any
-			when{
-			  changeset "**/worker/**"
-			  branch 'master'
-			}
+                        when{
+                          changeset "**/worker/**"
+                          branch 'master'
+                        }
             steps {
-                echo 'packaging worker app with docker' 
+                echo 'packaging worker app with docker'
                 script {
                     docker.withRegistry('https://index.docker.io/v1', 'dockerlogin') {
                        def workerImage = docker.build("enrianaya/worker:v${env.BUILD_ID}", "./worker")
@@ -74,14 +74,14 @@ pipeline {
             }
 
         }
-		
+
         stage('result build') {
             agent{
               docker{
                 image 'node:8.16.0-alpine'
               }
             }
-			when {
+                        when {
                 changeset "**/result/**"
             }
             steps {
@@ -104,18 +104,18 @@ pipeline {
                 echo 'Running Unit Tets on result app..'
                 dir('result') {
                     sh 'npm install'
-					sh 'npm test'
+                                        sh 'npm test'
                 }
             }
         }
         stage('result-docker-package') {
             agent any
-			when{
-			  changeset "**/result/**"
-			  branch 'master'
-			}
+                        when{
+                          changeset "**/result/**"
+                          branch 'master'
+                        }
             steps {
-                echo 'packaging result app with docker' 
+                echo 'packaging result app with docker'
                 script {
                     docker.withRegistry('https://index.docker.io/v1', 'dockerlogin') {
                        def resultImage = docker.build("enrianaya/result:v${env.BUILD_ID}", "./result")
@@ -126,12 +126,12 @@ pipeline {
             }
 
         }
-		
-		stage('vote build') {
+
+	stage('vote build') {
             agent{
               docker{
                 image 'python:2.7.16-slim'
-				args '--user root'
+                                args '--user root'
               }
             }
             when {
@@ -157,9 +157,9 @@ pipeline {
         }
         stage('vote-docker-package') {
             agent any
-			when{
+                        when{
               changeset "**/vote/**"
-			  branch 'master'
+                          branch 'master'
             }
             steps {
                 echo 'packaging vote app with docker'
@@ -186,6 +186,4 @@ pipeline {
         }
     }
 
-	    
 }
-
